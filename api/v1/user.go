@@ -66,28 +66,7 @@ func UpdateUser(c *gin.Context) {
 }
 
 func GetUserProfile(c *gin.Context) {
-	session := sessions.Default(c)
-	userId := session.Get(middleware.SESSION_USER_ID_KEY)
-	userRole := session.Get(middleware.SESSION_USER_ROLE_KEY)
-	if userId == nil || userRole == nil {
-		code := utils.NOT_LOGIN
-		c.JSON(http.StatusOK, gin.H{
-			"status": code,
-			"data":   userId,
-			"msg":    utils.GetErrMsg(code),
-		})
-		return
-	}
-	if userRole.(string) != middleware.USER_ROLE_USER {
-		code := utils.SESSION_ERROR
-		c.JSON(http.StatusOK, gin.H{
-			"status": code,
-			"data":   userId,
-			"msg":    utils.GetErrMsg(code),
-		})
-		return
-	}
-	data, code := model.SelectUserProfileById(userId.(int))
+	data, code := model.SelectUserProfileById(sessions.Default(c).Get(middleware.SESSION_USER_ID_KEY).(int))
 	c.JSON(http.StatusOK, gin.H{
 		"status": code,
 		"data":   data,
@@ -96,35 +75,13 @@ func GetUserProfile(c *gin.Context) {
 }
 
 func UpdateUserProfile(c *gin.Context) {
-	session := sessions.Default(c)
-	userId := session.Get(middleware.SESSION_USER_ID_KEY)
-	userRole := session.Get(middleware.SESSION_USER_ROLE_KEY)
-	if userId == nil || userRole == nil {
-		code := utils.NOT_LOGIN
-		c.JSON(http.StatusOK, gin.H{
-			"status": code,
-			"data":   userId,
-			"msg":    utils.GetErrMsg(code),
-		})
-		return
-	}
-	if userRole.(string) != middleware.USER_ROLE_USER {
-		code := utils.SESSION_ERROR
-		c.JSON(http.StatusOK, gin.H{
-			"status": code,
-			"data":   userId,
-			"msg":    utils.GetErrMsg(code),
-		})
-		return
-	}
-
 	var data model.UserProfile
 	if err := c.ShouldBindJSON(&data); err != nil {
 		fmt.Printf("err bind: %s \n", err)
 		return
 	}
 	var code int
-	data, code = model.UpdateUserProfileById(userId.(int), &data)
+	data, code = model.UpdateUserProfileById(sessions.Default(c).Get(middleware.SESSION_USER_ID_KEY).(int), &data)
 	c.JSON(http.StatusOK, gin.H{
 		"status":  code,
 		"data":    data,

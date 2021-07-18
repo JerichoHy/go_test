@@ -27,7 +27,7 @@ func InitDatabase() {
 		fmt.Printf("err database: %s \n", err)
 	}
 
-	db.AutoMigrate(&User{}, &Activity{}, &UserProfile{})
+	db.AutoMigrate(&User{}, &Activity{}, &UserProfile{}, &ParticipateRecord{})
 
 	sqlDB, err := db.DB()
 	if err != nil {

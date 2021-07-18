@@ -1,9 +1,11 @@
 package v1
 
 import (
+	"awesomeProject/middleware"
 	"awesomeProject/model"
 	"awesomeProject/utils"
 	"fmt"
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -72,5 +74,39 @@ func UpdateActivity(c *gin.Context) {
 		"status":  code,
 		"data":    data,
 		"message": utils.GetErrMsg(code),
+	})
+}
+
+func ParticipateActivity(c *gin.Context) {
+	var data model.ParticipateRecord
+	data.UserId = sessions.Default(c).Get(middleware.SESSION_USER_ID_KEY).(int)
+	data.ActivityId, _ = strconv.Atoi(c.Param("id"))
+	code := model.InsertParticipateRecord(&data)
+	c.JSON(http.StatusOK, gin.H{
+		"status": code,
+		"data":   data,
+		"msg":    utils.GetErrMsg(code),
+	})
+}
+
+func UnParticipateActivity(c *gin.Context) {
+	var data model.ParticipateRecord
+	data.UserId = sessions.Default(c).Get(middleware.SESSION_USER_ID_KEY).(int)
+	data.ActivityId, _ = strconv.Atoi(c.Param("id"))
+	participateRecord, code := model.DeleteParticipateRecord(&data)
+	c.JSON(http.StatusOK, gin.H{
+		"status": code,
+		"data":   participateRecord,
+		"msg":    utils.GetErrMsg(code),
+	})
+}
+
+func GetParticipateActivityListByUserId(c *gin.Context) {
+	userId := sessions.Default(c).Get(middleware.SESSION_USER_ID_KEY).(int)
+	data, code := model.SelectParticipateActivityListByUserId(userId)
+	c.JSON(http.StatusOK, gin.H{
+		"status": code,
+		"data":   data,
+		"msg":    utils.GetErrMsg(code),
 	})
 }
